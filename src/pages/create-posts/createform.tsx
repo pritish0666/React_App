@@ -1,60 +1,56 @@
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { addDoc,collection } from "firebase/firestore";
-import { auth,db } from "../../config/firebase";
+import { addDoc, collection } from "firebase/firestore";
+import { auth, db } from "../../config/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useNavigate } from "react-router-dom";
 
 interface schemaType {
-    title: string,
-    description : string;
+  title: string;
+  description: string;
 }
 
 export const CreateForm = () => {
+  const [user] = useAuthState(auth);
+  const navigate = useNavigate();
 
-    const [user] = useAuthState(auth);
-    const navigate = useNavigate();
+  const schema = yup.object().shape({
+    title: yup.string().required("Your Post must have a Title"),
+    description: yup.string().required("Add Description for your Post"),
+  });
 
-    const schema = yup.object().shape({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<schemaType>({
+    resolver: yupResolver(schema),
+  });
 
-        title: yup.string().required("Your Post must have a Title"),
-        description : yup.string().required("Add Description for your Post")
-    })
+  const postsRef = collection(db, "posts");
 
-    const { register,
-            handleSubmit,
-            formState:{errors}
-         } = useForm <schemaType> ({
-        resolver : yupResolver(schema)
-    })
+  const onCreatePost = async (data: schemaType) => {
+    //console.log(data)
+    await addDoc(postsRef, {
+      // title : data.title,
+      // description : data.description,
+      ...data,
+      username: user?.displayName,
+      userId: user?.uid,
+    });
+    navigate("/");
+  };
 
-    const postsRef = collection (db, "posts");
-
-    const onCreatePost = async (data:schemaType) => {
-
-        //console.log(data)
-        await addDoc(postsRef,{
-            // title : data.title,
-            // description : data.description,
-            ...data,
-            username: user?.displayName,
-            userId:user?.uid
-
-
-        })
-        navigate ("/");
-    }
-    
-    return (
+  return (
     <div>
-        <form onSubmit={handleSubmit(onCreatePost)}>
-            <input placeholder="Title"  {...register("title")} />
-            <p style={{color: "red"}}> {errors.title?.message} </p>
-            <textarea placeholder="Description" {...register("description")} />
-            <p style={{color:"red"}}> {errors.description?.message} </p>
-            <input type="submit" className="submitForm" />
-        </form>
+      <form onSubmit={handleSubmit(onCreatePost)}>
+        <input placeholder="Title" {...register("title")} />
+        <p style={{ color: "red" }}> {errors.title?.message} </p>
+        <textarea placeholder="Description" {...register("description")} />
+        <p style={{ color: "red" }}> {errors.description?.message} </p>
+        <input type="submit" className="submitForm" />
+      </form>
     </div>
-    );
+  );
 };
