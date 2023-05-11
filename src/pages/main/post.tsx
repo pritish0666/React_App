@@ -79,9 +79,9 @@ export const Post = (props:Props) => {
 
 
     
-    return <div>
+    return <div className="line">
         <div className="title">
-            <h1>{post.title}</h1>
+            <h1><u>{post.title}</u></h1>
         </div>
         <div className="body">
             <p>{post.description}</p>
@@ -93,4 +93,5 @@ export const Post = (props:Props) => {
            { likes && <p> Likes:{ likes?.length } </p> }
         </div>
     </div>
+    
 } 

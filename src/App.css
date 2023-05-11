@@ -85,6 +85,9 @@ input,
 textarea {
   font-family: "Nunito", sans-serif;
 }
+.line {
+  border-top: 1px solid blueviolet;
+}
 
 .createpost{
   width:100%;
